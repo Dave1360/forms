@@ -11,29 +11,153 @@
     <form>
         <h1>Lidl Bakery</h1>
         <label for="title">Bakery bread name</label>
-        <input id="title" type="text" required>
+        <input id="title" type="text" name="title" required>
 
         <h2>Bakery bread price?</h2>
         <label for="price">Price: </label>
-        <input id="price" type="tel" required>
+        <input id="price" type="tel" name="price" required>
 
         <h2>on sale?</h2>
         <label for="onSaleYes">Yes</label>
-        <input id="onSaleYes" type="radio" name="onSale" required>
+        <input id="onSaleYes" type="radio"value="yes" name="onSale" required>
         <label for="onSaleNo">No</label>
-        <input id="onSaleNo" type="radio" name="onSale" required>
+        <input id="onSaleNo" type="radio" value="no" name="onSale" required>
 
 
         <h2>Heated?</h2>
         <label for="heatedYes">Yes</label>
-        <input id="heatedYes" type="radio" name="heated" required>
+        <input id="heatedYes" type="radio" value="yes" name="heated" required>
         <label for="heatedNo">No</label>
-        <input id="heatedNo" type="radio" name="heated" required><br><br>
+        <input id="heatedNo" type="radio" value="no" name="heated" required><br><br>
 
 
-        <input type="submit">
+        <input type="submit" name="submit">
     </form>
-<!-- test -->
 
+    <div class="dataContainer"></div>
+
+    <template class="data-template"> 
+
+       <div class="broodContainer">
+        <p data-type></p>
+        <p data-price></p>
+        <p data-sale></p>
+        <p data-heat></p>
+        <button> delete Element </button>
+       </div>  
+
+
+    </template>
+
+    <button>Add Bager</button>
+
+    <script>   
+
+    let dest = document.querySelector(".dataContainer");
+ 
+    let bagerID = "5c7ceca93328147600003d25";
+
+    document.addEventListener("DOMContentLoaded", get);
+    
+   /*  const postData = JSON.stringify(data); */
+    
+    function post(newBager) {
+    fetch("https://bageren-c9e6.restdb.io/rest/bageren", {
+    method: "post",
+    headers: {
+    "Content-Type": "application/json; charset=utf-8",
+    "x-apikey": "5c7cec50cac6621685acbad6",
+    "cache-control": "no-cache"
+  },
+  body:JSON.stringify(newBager),
+})
+  .then(e => e.json())
+  .then(e => {
+    form.elements.submit.disabled = false;
+    get();
+    });
+}
+
+    function get() {
+
+    fetch("https://bageren-c9e6.restdb.io/rest/bageren", {
+    method: "get",
+    headers: {
+    "Content-Type": "application/json; charset=utf-8",
+    "x-apikey": "5c7cec50cac6621685acbad6",
+    "cache-control": "no-cache"
+  }
+})
+  .then(e => e.json())
+  .then(e => {
+      console.table(e);
+    showJson(e);
+    });
+}
+
+function deleteBager(id) {
+    fetch("https://bageren-c9e6.restdb.io/rest/bageren/" + id, {
+    method: "delete",
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'x-apikey': "5c7cec50cac6621685acbad6",
+      "cache-control": "no-cache"
+    }
+})
+  .then(e=> e.json())
+  .then(e=> {
+      console.log(e)
+  });
+}
+
+function showJson(e) {
+    let myTemplate = document.querySelector(".data-template");
+    dest.textContent = "";
+
+    e.forEach( bread => {
+        let clone = myTemplate.cloneNode(true).content;
+
+        clone.querySelector("[data-type]").textContent = bread.type;
+        clone.querySelector("[data-price]").textContent = bread.price;
+        clone.querySelector("[data-sale]").textContent = bread.sale;
+        clone.querySelector("[data-heat]").textContent = bread.heated;
+        clone.querySelector(".broodContainer").dataset.id = bread._id;
+
+        clone.querySelector("button").addEventListener("click", (e) => {
+            e.target.parentElement.remove();
+            deleteBager(bread._id);
+        });
+        
+        dest.appendChild(clone);
+
+    });
+}
+
+/* document.querySelector("button").addEventListener("click", () => {
+    const obj = {
+        type: "Spandauer",
+        price: 151,
+        sale: "no",
+        heated: "no"
+    }
+    post(obj);
+}); */
+
+  const form = document.querySelector("form");
+  form.addEventListener("submit", e => {
+    form.elements.submit.disabled = true;
+    e.preventDefault();
+    console.log("submitted");
+    const payload = {
+        type: form.elements.title.value,
+        price: form.elements.price.value,
+        sale: form.elements.onSale.value,
+        heated: form.elements.heated.value
+    }
+    console.log(payload)
+    post(payload);
+  });
+
+</script>
 </body>
 </html>
